@@ -153,6 +153,7 @@ export class TransferComponent {
     this.amountForm.markAllAsTouched();
     if (this.amountForm.invalid) return;
 
+    this.errorMessage.set('');
     this.step.set('confirm');
   }
 
@@ -175,7 +176,9 @@ export class TransferComponent {
             recipientName: this.recipient()?.holderName,
             recipientId: payload.toAccount,
             timestamp: new Date(),
-            rewardPointsEarned: res.rewardPointsEarned || Math.floor(payload.amount * 0.1)
+            rewardPointsEarned: (res.rewardPointsEarned !== undefined && res.rewardPointsEarned !== null)
+              ? res.rewardPointsEarned
+              : Math.floor(payload.amount / 100)
           });
           this.step.set('success');
           toast.success('Transfer complete!', { description: 'Funds have been sent successfully.' });
@@ -207,6 +210,7 @@ export class TransferComponent {
 
   goBack() {
     const currentStep = this.step();
+    this.errorMessage.set('');
     if (currentStep === 'verify') this.step.set('lookup');
     else if (currentStep === 'amount') this.step.set('verify');
     else if (currentStep === 'confirm') this.step.set('amount');

@@ -58,5 +58,15 @@ public class TransferResponse {
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
+
+    private Integer rewardPointsEarned;
+
+    public Integer getRewardPointsEarned() {
+        return rewardPointsEarned;
+    }
+
+    public void setRewardPointsEarned(Integer rewardPointsEarned) {
+        this.rewardPointsEarned = rewardPointsEarned;
+    }
 }
 

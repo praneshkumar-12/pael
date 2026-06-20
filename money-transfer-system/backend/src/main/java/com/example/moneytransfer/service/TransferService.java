@@ -53,6 +53,7 @@ public class TransferService {
             response.setDebitedFrom(log.getFromAccountId());
             response.setCreditedTo(log.getToAccountId());
             response.setAmount(log.getAmount());
+            response.setRewardPointsEarned(rewardService.getPointsForTransaction(log.getId()));
             return response;
         }
 
@@ -98,7 +99,7 @@ public class TransferService {
             transactionLogRepository.save(successLog);
 
             // 6b) Evaluate and grant reward points to the sender, if eligible
-            rewardService.evaluateAndGrant(successLog, source, destination);
+            int points = rewardService.evaluateAndGrant(successLog, source, destination);
 
             // 7) Build response
             TransferResponse response = new TransferResponse();
@@ -108,6 +109,7 @@ public class TransferService {
             response.setDebitedFrom(source.getId());
             response.setCreditedTo(destination.getId());
             response.setAmount(request.getAmount());
+            response.setRewardPointsEarned(points);
             return response;
 
         } catch (RuntimeException ex) {

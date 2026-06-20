@@ -39,19 +39,19 @@ public class RewardService {
      * so a reward issue can never block the underlying money transfer.
      */
     @Transactional
-    public void evaluateAndGrant(TransactionLog transactionLog, Account source, Account destination) {
+    public int evaluateAndGrant(TransactionLog transactionLog, Account source, Account destination) {
         if (!isEligible(transactionLog, source, destination)) {
-            return;
+            return 0;
         }
         if (rewardHistoryRepository.existsByTransactionId(transactionLog.getId())) {
-            return;
+            return 0;
         }
 
         int points = transactionLog.getAmount()
                 .divideToIntegralValue(POINTS_DIVISOR)
                 .intValue();
         if (points <= 0) {
-            return;
+            return 0;
         }
 
         RewardHistory reward = new RewardHistory();
@@ -64,6 +64,7 @@ public class RewardService {
         reward.setCreatedOn(Timestamp.from(Instant.now()));
 
         rewardHistoryRepository.save(reward);
+        return points;
     }
 
     private boolean isEligible(TransactionLog transactionLog, Account source, Account destination) {
@@ -71,13 +72,19 @@ public class RewardService {
             return false;
         }
         if (transactionLog.getAmount() == null
-                || transactionLog.getAmount().compareTo(MIN_ELIGIBLE_AMOUNT) <= 0) {
+                || transactionLog.getAmount().compareTo(MIN_ELIGIBLE_AMOUNT) < 0) {
             return false;
         }
         if (source.getId().equals(destination.getId())) {
             return false;
         }
         return !source.getUser().getId().equals(destination.getUser().getId());
+    }
+
+    public int getPointsForTransaction(UUID transactionId) {
+        return rewardHistoryRepository.findByTransactionId(transactionId)
+                .map(RewardHistory::getPointsEarned)
+                .orElse(0);
     }
 
     @Transactional(readOnly = true)
