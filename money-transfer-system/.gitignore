@@ -1,0 +1,14 @@
+target/
+node_modules/
+.idea/
+.vscode/
+dist/
+out/
+*.log
+.DS_Store
+
+# Environment and configuration files with secrets
+backend/src/main/resources/application.yml
+backend/src/main/resources/application-*.yml
+.env
+*.properties

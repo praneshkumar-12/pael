@@ -1,0 +1,142 @@
+<div class="space-y-6">
+  <!-- Title Header -->
+  <div class="mb-4">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900">Transaction History</h1>
+    <p class="text-sm text-slate-500 mt-1">Review, filter, and track all your financial transfers.</p>
+  </div>
+
+  <!-- Filters Section -->
+  <div hlmCard class="bg-white border border-slate-100 rounded-xl shadow-sm p-4 mb-4">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <!-- Search Input -->
+      <div class="relative flex-1">
+        <svg lucideSearch [size]="18" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></svg>
+        <input
+          hlmInput
+          type="text"
+          [ngModel]="searchText()"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Search by recipient or sender..."
+          class="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600"
+        />
+      </div>
+
+      <!-- Select Dropdowns -->
+      <div class="flex flex-col sm:flex-row gap-3">
+        <!-- Status Dropdown -->
+        <div class="flex flex-col gap-1">
+          <select
+            [ngModel]="statusFilter()"
+            (ngModelChange)="onStatusChange($event)"
+            class="bg-white border border-slate-200 text-slate-700 text-sm rounded-lg block w-full p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
+            id="status-filter-select"
+            aria-label="Filter by transaction status"
+          >
+            <option value="all">All Status</option>
+            <option value="SUCCESS">Success</option>
+            <option value="FAILED">Failed</option>
+          </select>
+        </div>
+
+        <!-- Direction Dropdown -->
+        <div class="flex flex-col gap-1">
+          <select
+            [ngModel]="directionFilter()"
+            (ngModelChange)="onDirectionChange($event)"
+            class="bg-white border border-slate-200 text-slate-700 text-sm rounded-lg block w-full p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
+            id="direction-filter-select"
+            aria-label="Filter by transaction direction"
+          >
+            <option value="all">All Transactions</option>
+            <option value="sent">Sent</option>
+            <option value="received">Received</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div hlmCard class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-0">
+    @if (isLoading()) {
+      <!-- Skeleton Loaders -->
+      <div class="p-6 space-y-4">
+        <hlm-skeleton class="h-6 w-full" *ngFor="let i of [1,2,3,4,5]" />
+      </div>
+    } @else {
+      @if (filteredTransactions().length === 0) {
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div class="p-4 bg-slate-50 text-slate-400 rounded-full mb-4">
+            <svg lucideHistory [size]="32"></svg>
+          </div>
+          <h3 class="text-base font-bold text-slate-800">No transactions found</h3>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm">No transfer matches your filters. Try adjusting search criteria or making a new transfer.</p>
+          <a
+            routerLink="/transfer"
+            hlmBtn
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg text-xs mt-5 transition-all"
+          >
+            Send Money Now
+          </a>
+        </div>
+      } @else {
+        <!-- Table container -->
+        <div hlmTableContainer class="w-full">
+          <table hlmTable class="w-full text-slate-700">
+            <thead hlmTHead class="bg-slate-50/75 border-b border-slate-100">
+              <tr hlmTr class="hover:bg-transparent">
+                <th hlmTh class="px-6 py-3 font-semibold text-slate-500 text-xs tracking-wider">Transaction</th>
+                <th hlmTh class="px-6 py-3 font-semibold text-slate-500 text-xs tracking-wider">Amount</th>
+                <th hlmTh class="px-6 py-3 font-semibold text-slate-500 text-xs tracking-wider">Status</th>
+                <th hlmTh class="px-6 py-3 font-semibold text-slate-500 text-xs tracking-wider">Date & Time</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody class="divide-y divide-slate-100">
+              <tr hlmTr *ngFor="let tx of filteredTransactions()" class="hover:bg-slate-50/50 transition-colors">
+                <td hlmTd class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="p-2 rounded-lg flex items-center justify-center"
+                      [ngClass]="tx.direction === 'sent' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'"
+                    >
+                      @if (tx.direction === 'sent') {
+                        <svg lucideArrowUpRight [size]="14"></svg>
+                      } @else {
+                        <svg lucideArrowDownLeft [size]="14"></svg>
+                      }
+                    </div>
+                    <div>
+                      <span class="text-sm font-semibold text-slate-800">{{ tx.otherPartyName || 'Unknown User' }}</span>
+                      <div class="text-[10px] text-slate-400 font-mono mt-0.5">ID: {{ tx.otherPartyId }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td hlmTd class="px-6 py-4">
+                  <span
+                    class="text-sm font-bold"
+                    [ngClass]="tx.direction === 'sent' ? 'text-slate-800' : 'text-emerald-600'"
+                  >
+                    {{ tx.direction === 'sent' ? '-' : '+' }}{{ tx.amount | currency:'USD' }}
+                  </span>
+                </td>
+                <td hlmTd class="px-6 py-4">
+                  <span
+                    hlmBadge
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
+                    [ngClass]="tx.status === 'SUCCESS' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'"
+                  >
+                    {{ tx.status }}
+                  </span>
+                </td>
+                <td hlmTd class="px-6 py-4">
+                  <span class="text-xs text-slate-500">{{ tx.createdOn | date:'dd MMM yyyy, hh:mm a' }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,4 @@
+/* Custom local styles for transfer wizard component */
+:host {
+  display: block;
+}

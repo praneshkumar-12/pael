@@ -1,0 +1,114 @@
+/* Register Component Styles — extends login styles */
+
+.auth-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: hsl(var(--destructive) / 0.08);
+  border: 1px solid hsl(var(--destructive) / 0.25);
+  color: hsl(var(--destructive));
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.form-input.with-icon {
+  padding-left: 2.75rem;
+}
+
+.form-input.with-suffix {
+  padding-right: 2.75rem;
+}
+
+.input-suffix-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.input-suffix-btn:hover {
+  color: hsl(var(--foreground));
+  background: none;
+  box-shadow: none;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.strength-bar {
+  height: 4px;
+  border-radius: 9999px;
+  flex: 1;
+  background: hsl(var(--border));
+  transition: background 0.3s;
+}
+
+.strength-bar.weak {
+  background: hsl(var(--destructive));
+}
+
+.strength-bar.medium {
+  background: var(--color-warning);
+}
+
+.strength-bar.strong {
+  background: var(--color-success);
+}
+
+.strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 50px;
+}
+
+.strength-text-weak { color: hsl(var(--destructive)); }
+.strength-text-medium { color: var(--color-warning); }
+.strength-text-strong { color: var(--color-success); }
+
+.auth-footer-text {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-footer-text a {
+  color: var(--color-primary);
+  font-weight: 600;
+}

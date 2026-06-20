@@ -1,0 +1,71 @@
+/* Login Component Styles */
+
+.auth-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: hsl(var(--destructive) / 0.08);
+  border: 1px solid hsl(var(--destructive) / 0.25);
+  color: hsl(var(--destructive));
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.25rem;
+}
+
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.form-input.with-icon {
+  padding-left: 2.75rem;
+}
+
+.form-input.with-suffix {
+  padding-right: 2.75rem;
+}
+
+.input-suffix-btn {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.input-suffix-btn:hover {
+  color: hsl(var(--foreground));
+  background: none;
+  box-shadow: none;
+  transform: none !important;
+}
+
+.auth-footer-text {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.auth-footer-text a {
+  color: var(--color-primary);
+  font-weight: 600;
+}

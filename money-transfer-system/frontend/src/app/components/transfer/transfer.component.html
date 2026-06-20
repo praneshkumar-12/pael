@@ -1,0 +1,350 @@
+<div class="max-w-xl mx-auto space-y-6">
+  <!-- Title Header -->
+  <div class="text-center mb-2">
+    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Send Money</h1>
+    <p class="text-sm text-slate-500 mt-1">Transfer funds instantly and securely</p>
+  </div>
+
+  <!-- Wizard Steps Indicator -->
+  <div class="bg-white border border-slate-100 rounded-xl p-4 flex items-center justify-between shadow-sm mb-4">
+    <div class="flex items-center gap-2">
+      <div
+        class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+        [ngClass]="step() === 'lookup' || step() === 'verify' ? 'bg-indigo-600 text-white' : 'bg-emerald-100 text-emerald-800'"
+      >
+        @if (step() !== 'lookup' && step() !== 'verify' && step() !== 'success') {
+          ✓
+        } @else {
+          1
+        }
+      </div>
+      <span class="text-xs font-medium" [ngClass]="step() === 'lookup' || step() === 'verify' ? 'text-indigo-600 font-bold' : 'text-slate-500'">Recipient</span>
+    </div>
+    <div class="h-px bg-slate-200 flex-1 mx-3"></div>
+    
+    <div class="flex items-center gap-2">
+      <div
+        class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+        [ngClass]="step() === 'amount' ? 'bg-indigo-600 text-white' : (step() === 'confirm' || step() === 'success' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400')"
+      >
+        @if (step() === 'confirm' || step() === 'success') {
+          ✓
+        } @else {
+          2
+        }
+      </div>
+      <span class="text-xs font-medium" [ngClass]="step() === 'amount' ? 'text-indigo-600 font-bold' : 'text-slate-500'">Amount</span>
+    </div>
+    <div class="h-px bg-slate-200 flex-1 mx-3"></div>
+
+    <div class="flex items-center gap-2">
+      <div
+        class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold"
+        [ngClass]="step() === 'confirm' ? 'bg-indigo-600 text-white' : (step() === 'success' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-400')"
+      >
+        @if (step() === 'success') {
+          ✓
+        } @else {
+          3
+        }
+      </div>
+      <span class="text-xs font-medium" [ngClass]="step() === 'confirm' ? 'text-indigo-600 font-bold' : 'text-slate-500'">Confirm</span>
+    </div>
+  </div>
+
+  <!-- Wizard Card Content -->
+  <div hlmCard class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden p-6">
+
+    <!-- STEP 1: Lookup Recipient -->
+    @if (step() === 'lookup') {
+      <div class="space-y-4">
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-slate-800">Who are you sending money to?</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Enter the recipient's numeric account ID to retrieve details.</p>
+        </div>
+
+        <form [formGroup]="lookupForm" (ngSubmit)="onLookupSubmit()" class="space-y-4">
+          <div class="space-y-1.5">
+            <input
+              hlmInput
+              type="text"
+              id="toAccountId"
+              formControlName="toAccountId"
+              placeholder="Enter the recepient's account number"
+              class="w-full text-sm py-2 px-3 bg-white"
+              [class.border-red-500]="lookupInvalid"
+            />
+            @if (lookupInvalid) {
+              <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <svg lucideAlertCircle [size]="12"></svg>
+                Valid numeric Account Number is required
+              </p>
+            }
+          </div>
+
+          <button
+            hlmBtn
+            type="submit"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all mt-4"
+            [disabled]="isLookingUp()"
+            id="lookup-submit-btn"
+          >
+            @if (isLookingUp()) {
+              <svg lucideLoader [size]="16" class="animate-spin"></svg> Searching...
+            } @else {
+              Continue <svg lucideArrowRight [size]="16"></svg>
+            }
+          </button>
+        </form>
+      </div>
+    }
+
+    <!-- STEP 2: Verify Recipient Details -->
+    @if (step() === 'verify') {
+      <div class="space-y-5">
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-slate-800">Verify Recipient</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Verify that the details match your intended recipient.</p>
+        </div>
+
+        <!-- Recipient Card Detail -->
+        <div class="p-5 border rounded-xl bg-slate-50 border-slate-200 relative overflow-hidden">
+          <div class="flex items-start gap-4">
+            <div class="p-3 bg-indigo-100 text-indigo-700 rounded-xl">
+              <svg lucideUser [size]="24"></svg>
+            </div>
+            <div class="space-y-1">
+              <div class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Account Holder</div>
+              <div class="text-base font-bold text-slate-800">{{ recipient()?.holderName }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">Account Number: <span class="font-mono">{{ recipient()?.id }}</span></div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Status</span>
+            @if (recipient()?.status === 'ACTIVE') {
+              <span hlmBadge class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold border-none">Active</span>
+            } @else if (recipient()?.status === 'UNVERIFIED') {
+              <span hlmBadge class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-semibold border-none flex items-center gap-1">
+                <svg lucideAlertTriangle [size]="10"></svg> Unverified
+              </span>
+            } @else {
+              <span hlmBadge class="bg-red-100 text-red-800 text-[10px] px-2 py-0.5 rounded-full font-bold border-none">{{ recipient()?.status }}</span>
+            }
+          </div>
+        </div>
+
+        @if (recipient()?.status === 'UNVERIFIED') {
+          <div class="p-3 bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-lg flex gap-2">
+            <svg lucideAlertTriangle [size]="16" class="flex-shrink-0 mt-0.5"></svg>
+            <div>
+              <strong>Security Warning:</strong> We couldn't check this recipient on the network. Make sure the ID is correct before executing the transfer.
+            </div>
+          </div>
+        }
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            hlmBtn
+            variant="outline"
+            (click)="goBack()"
+            class="flex-1 py-2 rounded-lg flex items-center justify-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+          >
+            <svg lucideArrowLeft [size]="16"></svg> Change Account Number
+          </button>
+          <button
+            hlmBtn
+            (click)="confirmRecipient()"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all"
+            id="recipient-confirm-btn"
+          >
+            Proceed <svg lucideArrowRight [size]="16"></svg>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: Enter Amount -->
+    @if (step() === 'amount') {
+      <div class="space-y-4">
+        <div class="mb-4">
+          <h2 class="text-lg font-bold text-slate-800">Enter Transfer Amount</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Specify how much you would like to transfer to {{ recipient()?.holderName }}.</p>
+        </div>
+
+        <form [formGroup]="amountForm" (ngSubmit)="onAmountSubmit()" class="space-y-4">
+          <div class="space-y-1.5">
+            <label hlmLabel for="amount" class="text-slate-700 font-medium mb-2">Amount (USD)</label>
+            <div class="relative">
+              <input
+                hlmInput
+                type="number"
+                id="amount"
+                formControlName="amount"
+                placeholder="Enter amount in USD"
+                step="0.01"
+                min="0.01"
+                max="100000"
+                class="w-full text-base font-bold py-2.5 px-3 bg-white"
+                [class.border-red-500]="amountInvalid"
+              />
+            </div>
+            @if (amountInvalid) {
+              <p class="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <svg lucideAlertCircle [size]="12"></svg>
+                Please enter a valid amount between $0.01 and $100,000.00
+              </p>
+            }
+          </div>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button
+              hlmBtn
+              type="button"
+              variant="outline"
+              (click)="goBack()"
+              class="flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+            >
+              <svg lucideArrowLeft [size]="16"></svg> Back
+            </button>
+            <button
+              hlmBtn
+              type="submit"
+              class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all"
+              id="amount-submit-btn"
+            >
+              Review <svg lucideArrowRight [size]="16"></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- STEP 4: Confirm Transfer -->
+    @if (step() === 'confirm') {
+      <div class="space-y-5">
+        <div class="mb-2">
+          <h2 class="text-lg font-bold text-slate-800">Confirm Transfer</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Please review the details below before processing the transfer.</p>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-lg flex items-center gap-2 animate-fade-in">
+            <svg lucideAlertCircle [size]="16"></svg>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <!-- Summary Details -->
+        <div class="border rounded-xl divide-y divide-slate-100 overflow-hidden">
+          <div class="p-4 bg-slate-50 flex items-center justify-between">
+            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Recipient Name</span>
+            <span class="text-sm font-bold text-slate-800">{{ recipient()?.holderName }}</span>
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Recipient Account ID</span>
+            <span class="text-sm font-mono font-semibold text-slate-700">{{ recipient()?.id }}</span>
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Amount</span>
+            <span class="text-sm font-bold text-slate-800">{{ amountForm.value.amount | currency:'USD' }}</span>
+          </div>
+          <div class="p-4 flex items-center justify-between">
+            <span class="text-xs text-slate-500">Transfer Fee</span>
+            <span class="text-sm font-medium text-emerald-600">Free ($0.00)</span>
+          </div>
+          <div class="p-4 bg-slate-50/50 flex items-center justify-between border-t border-slate-200">
+            <span class="text-xs font-bold text-slate-700">Total Charged</span>
+            <span class="text-base font-extrabold text-slate-900">{{ amountForm.value.amount | currency:'USD' }}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button
+            hlmBtn
+            variant="outline"
+            (click)="goBack()"
+            class="flex-1 py-2.5 rounded-lg flex items-center justify-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold"
+            [disabled]="isSubmitting()"
+          >
+            <svg lucideArrowLeft [size]="16"></svg> Edit Amount
+          </button>
+          
+          <button
+            hlmBtn
+            (click)="executeTransfer()"
+            class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-semibold transition-all"
+            [disabled]="isSubmitting()"
+            id="confirm-execute-btn"
+          >
+            @if (isSubmitting()) {
+              <svg lucideLoader [size]="16" class="animate-spin"></svg> Sending...
+            } @else {
+              Confirm & Send <svg lucideSend [size]="16"></svg>
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 5: Success Screen -->
+    @if (step() === 'success') {
+      <div class="text-center py-4 space-y-6 animate-fade-in">
+        <div class="mx-auto w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shadow-inner">
+          <svg lucideCheckCircle2 [size]="32" class="stroke-[2.5]"></svg>
+        </div>
+
+        <div class="space-y-1">
+          <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Transfer Successful!</h2>
+          <p class="text-xs text-slate-400">Your funds have been dispatched immediately.</p>
+        </div>
+
+        <!-- Receipt Detail Box -->
+        <div class="bg-slate-50 rounded-xl p-5 border border-slate-100 max-w-sm mx-auto text-left divide-y divide-slate-200/60 text-xs">
+          <div class="pb-3 flex justify-between">
+            <span class="text-slate-400">Transaction ID</span>
+            <span class="font-mono font-semibold text-slate-800">{{ receipt()?.transactionId }}</span>
+          </div>
+          <div class="py-3 flex justify-between">
+            <span class="text-slate-400">Sent To</span>
+            <span class="font-bold text-slate-800">{{ receipt()?.recipientName }} (ID: {{ receipt()?.recipientId }})</span>
+          </div>
+          <div class="py-3 flex justify-between">
+            <span class="text-slate-400">Amount Transferred</span>
+            <span class="font-extrabold text-slate-900 text-sm">{{ receipt()?.amount | currency:'USD' }}</span>
+          </div>
+          <div class="py-3 flex justify-between">
+            <span class="text-slate-400">Date</span>
+            <span class="text-slate-800">{{ receipt()?.timestamp | date:'dd MMM yyyy, hh:mm a' }}</span>
+          </div>
+          <div class="pt-3 flex justify-between items-center text-amber-800 font-semibold bg-amber-50/50 -mx-5 -mb-5 px-5 py-3 rounded-b-xl border-t border-amber-100">
+            <span class="flex items-center gap-1.5">
+              <svg lucideStar [size]="14" class="fill-amber-400 text-amber-500"></svg> Rewards Point Earned
+            </span>
+            <span class="font-extrabold text-sm">+{{ receipt()?.rewardPointsEarned }} pts</span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <button
+            hlmBtn
+            variant="outline"
+            routerLink="/dashboard"
+            class="w-full sm:w-auto px-6 py-2 rounded-lg font-semibold text-slate-600 border-slate-200 hover:bg-slate-50"
+          >
+            Dashboard
+          </button>
+          <button
+            hlmBtn
+            (click)="resetTransfer()"
+            class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition-all"
+            id="make-another-btn"
+          >
+            Make Another Transfer
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

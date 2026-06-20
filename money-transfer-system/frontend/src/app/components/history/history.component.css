@@ -1,0 +1,4 @@
+/* Custom local styles for history component */
+:host {
+  display: block;
+}
