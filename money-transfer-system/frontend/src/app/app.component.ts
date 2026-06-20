@@ -133,6 +133,13 @@ export class AppComponent implements OnInit {
     this.profileOpen.set(false);
   }
 
+  @HostListener('window:storage', ['$event'])
+  onStorageChange(event: StorageEvent) {
+    if (event.key === 'auth_token') {
+      window.location.reload();
+    }
+  }
+
   logout() {
     this.username.set('');
     this.profileOpen.set(false);
