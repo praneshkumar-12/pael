@@ -8,8 +8,6 @@ out/
 .DS_Store
 
 # Environment and configuration files with secrets
-backend/src/main/resources/application.yml
-backend/src/main/resources/application-*.yml
 .env
 *.properties
 
